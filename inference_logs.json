@@ -1,0 +1,86 @@
+{
+    "config": {
+        "model": {
+            "small": "tuochao/Llama-3.2-1B-Proactive-Small-Peft",
+            "big": "tuochao/Llama-3.1-8B-Proactive-Big-Peft",
+            "llama-small": "meta-llama/Llama-3.2-1B-Instruct",
+            "llama-big": "meta-llama/Llama-3.1-8B-Instruct"
+        },
+        "dataset": "https://drive.google.com/file/d/1TEquHZR8E53WLR-v09F1Do5UMQH5tjYZ/view?usp=share_link"
+    },
+    "ratios": {
+        "mean": 0.14233729135223164,
+        "std": 0.04454750214900863,
+        "min": 0.043478260869565216,
+        "max": 0.25806451612903225,
+        "count": 100,
+        "sum": 14.233729135223166
+    },
+    "resp_lengths": {
+        "mean": 2.0780856423173804,
+        "std": 0.5418955095727557,
+        "min": 1.0,
+        "max": 4.0,
+        "count": 397,
+        "sum": 825
+    },
+    "gen_ignore_counts": {
+        "mean": 0.08,
+        "std": 0.3059411708155671,
+        "min": 0.0,
+        "max": 2.0,
+        "count": 100,
+        "sum": 8
+    },
+    "num_resps": {
+        "mean": 4.05,
+        "std": 1.6454482671904334,
+        "min": 1.0,
+        "max": 9.0,
+        "count": 100,
+        "sum": 405
+    },
+    "speaker_num_turns": {
+        "mean": 23.38,
+        "std": 3.788878462025405,
+        "min": 14.0,
+        "max": 33.0,
+        "count": 100,
+        "sum": 2338
+    },
+    "num_spoken": {
+        "mean": 3.97,
+        "std": 1.6028412273210344,
+        "min": 1.0,
+        "max": 9.0,
+        "count": 100,
+        "sum": 397
+    },
+    "hard": {
+        "TP": 293,
+        "FP": 104,
+        "FN": 123,
+        "TN": 2737,
+        "accuracy": 0.9303039607000307,
+        "precision": 0.7380352644836272,
+        "recall": 0.7043269230769231
+    },
+    "med": {
+        "TP": 299,
+        "FP": 98,
+        "FN": 117,
+        "TN": 2743,
+        "med_accuracy": 0.933988332821615,
+        "med_precision": 0.7531486146095718,
+        "med_recall": 0.71875
+    },
+    "soft": {
+        "TP": 370,
+        "FP": 27,
+        "FN": 46,
+        "TN": 2814,
+        "soft_accuracy": 0.9775867362603623,
+        "soft_precision": 0.9319899244332494,
+        "soft_recall": 0.8894230769230769
+    }
+}

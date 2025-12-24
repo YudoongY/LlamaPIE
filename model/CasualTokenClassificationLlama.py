@@ -1,4 +1,12 @@
 from transformers.models.llama.modeling_llama import *
+from transformers.modeling_outputs import CausalLMOutputWithPast
+from transformers.cache_utils import Cache
+from transformers.utils import (
+    add_start_docstrings_to_model_forward,
+    replace_return_docstrings,
+)
+
+LLAMA_INPUTS_DOCSTRING = ""
 import math
 from typing import List, Optional, Tuple, Union
 
@@ -9,6 +17,7 @@ from torch import nn
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
 
 _CONFIG_FOR_DOC = "LlamaConfig"
+
 
 class LlamaForCausalLM_TokenClassifcation(LlamaPreTrainedModel):
     _tied_weights_keys = ["lm_head.weight"]
@@ -43,9 +52,11 @@ class LlamaForCausalLM_TokenClassifcation(LlamaPreTrainedModel):
 
     def get_decoder(self):
         return self.model
-    
+
     @add_start_docstrings_to_model_forward(LLAMA_INPUTS_DOCSTRING)
-    @replace_return_docstrings(output_type=CausalLMOutputWithPast, config_class=_CONFIG_FOR_DOC)
+    @replace_return_docstrings(
+        output_type=CausalLMOutputWithPast, config_class=_CONFIG_FOR_DOC
+    )
     def forward(
         self,
         input_ids: torch.LongTensor = None,
@@ -84,11 +95,19 @@ class LlamaForCausalLM_TokenClassifcation(LlamaPreTrainedModel):
         >>> tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
         "Hey, are you conscious? Can you talk to me?\nI'm not conscious, but I can talk to you."
         ```"""
-        output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
-        output_hidden_states = (
-            output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
+        output_attentions = (
+            output_attentions
+            if output_attentions is not None
+            else self.config.output_attentions
         )
-        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
+        output_hidden_states = (
+            output_hidden_states
+            if output_hidden_states is not None
+            else self.config.output_hidden_states
+        )
+        return_dict = (
+            return_dict if return_dict is not None else self.config.use_return_dict
+        )
         # print("input_ids: ", input_ids)
         # print(attention_mask)
         # decoder outputs consists of (dec_features, layer_state, dec_hidden, dec_attn)
@@ -134,7 +153,6 @@ class LlamaForCausalLM_TokenClassifcation(LlamaPreTrainedModel):
             attentions=outputs.attentions,
         )
 
-
     def prepare_inputs_for_generation(
         self,
         input_ids,
@@ -144,23 +162,34 @@ class LlamaForCausalLM_TokenClassifcation(LlamaPreTrainedModel):
         cache_position=None,
         use_cache=True,
         **kwargs,
-    ):  
+    ):
         # print("!!!!!!!! generation inside")
         past_length = 0
         if past_key_values is not None:
             # Past key values are always initialized with a `Cache` object -> no need for if-else anymore
-            past_length = cache_position[0] if cache_position is not None else past_key_values.get_seq_length()
+            past_length = (
+                cache_position[0]
+                if cache_position is not None
+                else past_key_values.get_seq_length()
+            )
             max_cache_length = (
                 torch.tensor(past_key_values.get_max_length(), device=input_ids.device)
                 if past_key_values.get_max_length() is not None
                 else None
             )
-            cache_length = past_length if max_cache_length is None else torch.min(max_cache_length, past_length)
+            cache_length = (
+                past_length
+                if max_cache_length is None
+                else torch.min(max_cache_length, past_length)
+            )
 
             # Keep only the unprocessed tokens:
             # 1 - If the length of the attention_mask exceeds the length of input_ids, then we are in a setting where
             # some of the inputs are exclusively passed as part of the cache (e.g. when passing input_embeds as input)
-            if attention_mask is not None and attention_mask.shape[1] > input_ids.shape[1]:
+            if (
+                attention_mask is not None
+                and attention_mask.shape[1] > input_ids.shape[1]
+            ):
                 input_ids = input_ids[:, -(attention_mask.shape[1] - past_length) :]
             # 2 - If the past_length is smaller than input_ids', then input_ids holds all input tokens. We can discard
             # input_ids based on the past_length.
@@ -192,9 +221,13 @@ class LlamaForCausalLM_TokenClassifcation(LlamaPreTrainedModel):
             # TODO: use `next_tokens` directly instead.
             model_inputs = {"input_ids": input_ids.contiguous()}
 
-        input_length = position_ids.shape[-1] if position_ids is not None else input_ids.shape[-1]
+        input_length = (
+            position_ids.shape[-1] if position_ids is not None else input_ids.shape[-1]
+        )
         if cache_position is None:
-            cache_position = torch.arange(past_length, past_length + input_length, device=input_ids.device)
+            cache_position = torch.arange(
+                past_length, past_length + input_length, device=input_ids.device
+            )
         elif use_cache:
             cache_position = cache_position[-input_length:]
         model_inputs.update(
@@ -213,6 +246,9 @@ class LlamaForCausalLM_TokenClassifcation(LlamaPreTrainedModel):
         reordered_past = ()
         for layer_past in past_key_values:
             reordered_past += (
-                tuple(past_state.index_select(0, beam_idx.to(past_state.device)) for past_state in layer_past),
+                tuple(
+                    past_state.index_select(0, beam_idx.to(past_state.device))
+                    for past_state in layer_past
+                ),
             )
         return reordered_past
